@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Box,
   Button,
@@ -29,12 +29,14 @@ import {
   VStack,
   Wrap,
 } from '@chakra-ui/react';
-import { useScheduleContext } from './ScheduleContext.tsx';
-import { Lecture } from './types.ts';
-import { parseSchedule } from './utils.ts';
 import axios from 'axios';
-import { DAY_LABELS } from './constants.ts';
-import { createQueryCache } from './lib/queryCache';
+
+import { useScheduleContext } from '@/contexts/ScheduleContext';
+import { Lecture } from '@/types';
+import { parseSchedule } from '@/lib/utils';
+import { DAY_LABELS } from '@/constants';
+import { createQueryCache } from '@/lib/queryCache';
+import { filterLectures, SearchOption } from './SearchDialog.utils';
 
 interface Props {
   searchInfo: {
@@ -43,15 +45,6 @@ interface Props {
     time?: number;
   } | null;
   onClose: () => void;
-}
-
-interface SearchOption {
-  query?: string;
-  grades: number[];
-  days: string[];
-  times: number[];
-  majors: string[];
-  credits?: number;
 }
 
 const TIME_SLOTS = [
@@ -102,7 +95,6 @@ const fetchAllLectures = () =>
     queryCache.fetch('liberalArts', fetchLiberalArts),
   ]);
 
-// TODO: 이 컴포넌트에서 불필요한 연산이 발생하지 않도록 다양한 방식으로 시도해주세요.
 const SearchDialog = ({ searchInfo, onClose }: Props) => {
   const { setSchedulesMap } = useScheduleContext();
 
@@ -118,49 +110,18 @@ const SearchDialog = ({ searchInfo, onClose }: Props) => {
     majors: [],
   });
 
-  const getFilteredLectures = () => {
-    const { query = '', credits, grades, days, times, majors } = searchOptions;
-    return lectures
-      .filter(
-        (lecture) =>
-          lecture.title.toLowerCase().includes(query.toLowerCase()) ||
-          lecture.id.toLowerCase().includes(query.toLowerCase())
-      )
-      .filter(
-        (lecture) => grades.length === 0 || grades.includes(lecture.grade)
-      )
-      .filter(
-        (lecture) => majors.length === 0 || majors.includes(lecture.major)
-      )
-      .filter(
-        (lecture) => !credits || lecture.credits.startsWith(String(credits))
-      )
-      .filter((lecture) => {
-        if (days.length === 0) {
-          return true;
-        }
-        const schedules = lecture.schedule
-          ? parseSchedule(lecture.schedule)
-          : [];
-        return schedules.some((s) => days.includes(s.day));
-      })
-      .filter((lecture) => {
-        if (times.length === 0) {
-          return true;
-        }
-        const schedules = lecture.schedule
-          ? parseSchedule(lecture.schedule)
-          : [];
-        return schedules.some((s) =>
-          s.range.some((time) => times.includes(time))
-        );
-      });
-  };
+  // useMemo로 필터링 결과 메모이제이션 (순수 함수 활용)
+  const filteredLectures = useMemo(
+    () => filterLectures(lectures, searchOptions),
+    [lectures, searchOptions]
+  );
 
-  const filteredLectures = getFilteredLectures();
   const lastPage = Math.ceil(filteredLectures.length / PAGE_SIZE);
   const visibleLectures = filteredLectures.slice(0, page * PAGE_SIZE);
-  const allMajors = [...new Set(lectures.map((lecture) => lecture.major))];
+  const allMajors = useMemo(
+    () => [...new Set(lectures.map((lecture) => lecture.major))],
+    [lectures]
+  );
 
   const changeSearchOption = (
     field: keyof SearchOption,

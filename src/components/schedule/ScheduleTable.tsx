@@ -12,10 +12,11 @@ import {
   PopoverTrigger,
   Text,
 } from "@chakra-ui/react";
-import { CellSize, DAY_LABELS, 분 } from "./constants.ts";
-import { Schedule } from "./types.ts";
-import { fill2, parseHnM } from "./utils.ts";
 import { useDndContext, useDraggable } from "@dnd-kit/core";
+
+import { CellSize, DAY_LABELS, 분 } from "@/constants";
+import { Schedule } from "@/types";
+import { fill2, parseHnM } from "@/lib/utils";
 import { CSS } from "@dnd-kit/utilities";
 import { ComponentProps, Fragment } from "react";
 
