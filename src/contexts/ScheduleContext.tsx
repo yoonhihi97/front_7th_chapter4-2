@@ -18,13 +18,15 @@ const ScheduleCommandContext = createContext<
   React.Dispatch<React.SetStateAction<SchedulesMap>> | undefined
 >(undefined);
 
-// 기존 호환성 유지를 위한 통합 훅
+// 통합 훅 - 값 조회와 변경 모두 필요할 때
 export const useScheduleContext = () => {
   const schedulesMap = useContext(ScheduleQueryContext);
   const setSchedulesMap = useContext(ScheduleCommandContext);
 
   if (schedulesMap === undefined || setSchedulesMap === undefined) {
-    throw new Error('useScheduleContext must be used within a ScheduleProvider');
+    throw new Error(
+      'useScheduleContext must be used within a ScheduleProvider'
+    );
   }
 
   return { schedulesMap, setSchedulesMap };
@@ -46,7 +48,9 @@ export const useScheduleCommand = () => {
   const setSchedulesMap = useContext(ScheduleCommandContext);
 
   if (setSchedulesMap === undefined) {
-    throw new Error('useScheduleCommand must be used within a ScheduleProvider');
+    throw new Error(
+      'useScheduleCommand must be used within a ScheduleProvider'
+    );
   }
 
   return setSchedulesMap;
