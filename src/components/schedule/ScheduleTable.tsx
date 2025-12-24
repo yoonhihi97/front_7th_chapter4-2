@@ -28,10 +28,34 @@ interface Props {
   onScheduleUpdate?: (tableId: string, index: number, newDay: string, newRange: number[]) => void;
 }
 
+// schedules 배열 내용 비교 함수
+const areSchedulesEqual = (prev: Schedule[], next: Schedule[]): boolean => {
+  if (prev === next) return true;
+  if (prev.length !== next.length) return false;
+
+  for (let i = 0; i < prev.length; i++) {
+    const p = prev[i];
+    const n = next[i];
+    if (
+      p.day !== n.day ||
+      p.range[0] !== n.range[0] ||
+      p.range.length !== n.range.length ||
+      p.lecture.id !== n.lecture.id
+    ) {
+      return false;
+    }
+  }
+  return true;
+};
+
 const ScheduleTable = memo(
   ({ tableId, schedules, onScheduleTimeClick, onDeleteButtonClick, onScheduleUpdate }: Props) => {
     const activeIdRef = useRef<string | null>(null);
     const { injectDragStyle, removeDragStyle } = useDragStyle();
+
+    // 콜백을 ref로 저장하여 memo 비교에서 제외
+    const onScheduleUpdateRef = useRef(onScheduleUpdate);
+    onScheduleUpdateRef.current = onScheduleUpdate;
 
     const sensors = useSensors(
       useSensor(PointerSensor, {
@@ -68,9 +92,9 @@ const ScheduleTable = memo(
         const newDay = DAY_LABELS[nowDayIndex + moveDayIndex];
         const newRange = schedule.range.map((time) => time + moveTimeIndex);
 
-        onScheduleUpdate?.(tableId, index, newDay, newRange);
+        onScheduleUpdateRef.current?.(tableId, index, newDay, newRange);
       },
-      [schedules, tableId, onScheduleUpdate, removeDragStyle]
+      [schedules, tableId, removeDragStyle]
     );
 
     const handleDragCancel = useCallback(() => {
@@ -106,7 +130,10 @@ const ScheduleTable = memo(
         </DragOverlay>
       </DndContext>
     );
-  }
+  },
+  (prevProps, nextProps) =>
+    prevProps.tableId === nextProps.tableId &&
+    areSchedulesEqual(prevProps.schedules, nextProps.schedules)
 );
 
 ScheduleTable.displayName = "ScheduleTable";
