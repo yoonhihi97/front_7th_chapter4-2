@@ -30,7 +30,7 @@ interface Props {
     tableId: string;
     day?: string;
     time?: number;
-  } | null;
+  };
   onClose: () => void;
 }
 
@@ -155,7 +155,7 @@ const SearchDialog = ({ searchInfo, onClose }: Props) => {
   }, [searchInfo]);
 
   return (
-    <Modal isOpen={Boolean(searchInfo)} onClose={onClose} size="6xl">
+    <Modal isOpen onClose={onClose} size="6xl">
       <ModalOverlay />
       <ModalContent maxW="90vw" w="1000px">
         <ModalHeader>수업 검색</ModalHeader>

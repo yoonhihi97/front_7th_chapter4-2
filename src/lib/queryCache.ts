@@ -15,12 +15,10 @@ export const createQueryCache = () => {
 
       // 캐시 히트: 에러가 아니면 재사용
       if (existing && existing.status !== 'error') {
-        console.log(`[Cache HIT] ${key}`);
         return existing.promise;
       }
 
       // 캐시 미스: 새로 fetch
-      console.log(`[Cache MISS] ${key}`);
       const promise = fetchFn()
         .then((data) => {
           const entry = cache.get(key);
@@ -47,10 +45,8 @@ export const createQueryCache = () => {
     invalidate: (key?: string) => {
       if (key) {
         cache.delete(key);
-        console.log(`[Cache INVALIDATED] ${key}`);
       } else {
         cache.clear();
-        console.log('[Cache CLEARED]');
       }
     },
 
