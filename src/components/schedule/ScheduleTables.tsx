@@ -6,8 +6,6 @@ import ScheduleTable from './ScheduleTable';
 import SearchDialog from '@/components/search/SearchDialog';
 
 export const ScheduleTables = () => {
-  console.log('[ScheduleTables] 렌더링');
-
   const { schedulesMap } = useScheduleContext();
   const setSchedulesMap = useScheduleCommand();
   const [searchInfo, setSearchInfo] = useState<{
