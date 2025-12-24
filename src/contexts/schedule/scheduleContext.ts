@@ -1,20 +1,15 @@
-import React, {
-  createContext,
-  PropsWithChildren,
-  useContext,
-  useState,
-} from 'react';
-
+import React, { createContext, useContext } from 'react';
 import { Schedule } from '@/types';
-import dummyScheduleMap from '@/data/dummyScheduleMap';
 
-type SchedulesMap = Record<string, Schedule[]>;
+export type SchedulesMap = Record<string, Schedule[]>;
 
 // Query Context - 값 조회용 (값 변경 시 리렌더링 발생)
-const ScheduleQueryContext = createContext<SchedulesMap | undefined>(undefined);
+export const ScheduleQueryContext = createContext<SchedulesMap | undefined>(
+  undefined
+);
 
 // Command Context - 값 변경용 (setter는 동일 참조 유지)
-const ScheduleCommandContext = createContext<
+export const ScheduleCommandContext = createContext<
   React.Dispatch<React.SetStateAction<SchedulesMap>> | undefined
 >(undefined);
 
@@ -54,17 +49,4 @@ export const useScheduleCommand = () => {
   }
 
   return setSchedulesMap;
-};
-
-export const ScheduleProvider = ({ children }: PropsWithChildren) => {
-  const [schedulesMap, setSchedulesMap] =
-    useState<SchedulesMap>(dummyScheduleMap);
-
-  return (
-    <ScheduleCommandContext.Provider value={setSchedulesMap}>
-      <ScheduleQueryContext.Provider value={schedulesMap}>
-        {children}
-      </ScheduleQueryContext.Provider>
-    </ScheduleCommandContext.Provider>
-  );
 };
